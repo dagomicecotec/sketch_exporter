@@ -1,0 +1,56 @@
+// Name of layer to copy
+var sourceLayerName = "gray_rectangle"
+
+// Ask user to select a Sketch file:
+var openDialog = NSSavePanel.savePanel()
+openDialog.setCanChooseFiles(true)
+openDialog.setAllowedFileTypes(["sketch"])
+openDialog.setCanChooseDirectories(false)
+openDialog.setAllowsMultipleSelection(false)
+openDialog.setCanCreateDirectories(false)
+openDialog.setTitle("Select the source Sketch document")
+
+if( openDialog.runModal() == NSOKButton ) {
+
+var writeTextToFile = function(text, filePath) {
+    var t = [NSString stringWithFormat:@"%@", text],
+    f = [NSString stringWithFormat:@"%@", filePath];
+    return [t writeToFile:f atomically:true encoding:NSUTF8StringEncoding error:nil];
+}
+
+function exportLayer(layer,path){
+ [doc saveArtboardOrSlice:layer toFile:path ];
+
+}
+
+
+
+    var savePanel = NSSavePanel.savePanel()
+    var path = savePanel.directoryURL().path()
+	var doc = context.document;
+	var selection = context.selection;
+
+	if(selection.count() == 0){
+		doc.showMessage("Please select something.");
+	}else{
+		for(var i = 0; i < selection.count(); i++){
+			var layer = selection[i];
+            var layerClass = layer.class();
+            var layer_name = layer.nodeName()
+            var listText_str = ''
+            for(var x = 0; x < layer.children().count(); x++){
+              var layerGroup = layer.children()
+              if(layerGroup[x].class() == 'MSTextLayer'){
+
+                  textReadFromLayer = layerGroup[x].attributedString().string()
+listText_str+= textReadFromLayer + "\n"
+              }
+          }
+writeTextToFile(listText_str, path + '/' + layer_name + '.txt')
+exportLayer(layer,path + '/' + layer_name + '.png')
+		}
+	}
+log(path)
+log("END")
+
+}
