@@ -4,11 +4,9 @@ var sourceLayerName = "gray_rectangle"
 // Ask user to select a Sketch file:
 var openDialog = NSSavePanel.savePanel()
 openDialog.setCanChooseFiles(true)
-openDialog.setAllowedFileTypes(["sketch"])
 openDialog.setCanChooseDirectories(false)
 openDialog.setAllowsMultipleSelection(false)
-openDialog.setCanCreateDirectories(false)
-openDialog.setTitle("Select the source Sketch document")
+openDialog.setTitle("Select the source Export files")
 
 if( openDialog.runModal() == NSOKButton ) {
 
@@ -30,6 +28,8 @@ function exportLayer(layer,path){
 	var doc = context.document;
 	var selection = context.selection;
 
+    var stringArray = [];
+
 	if(selection.count() == 0){
 		doc.showMessage("Please select something.");
 	}else{
@@ -43,9 +43,24 @@ function exportLayer(layer,path){
               if(layerGroup[x].class() == 'MSTextLayer'){
 
                   textReadFromLayer = layerGroup[x].attributedString().string()
-listText_str+= textReadFromLayer + "\n"
+                  listText_str+= textReadFromLayer + "\n"
+                  stringArray.push(String(textReadFromLayer))
               }
+
           }
+
+
+var jsonObj = { "nameLayer": stringArray };
+
+
+log(JSON.stringify(jsonObj, null, "\t"))
+
+var file = NSString.stringWithString(JSON.stringify(jsonObj, null, "\t"));
+// Save the file
+
+file.writeToFile_atomically_encoding_error(path, true, NSUTF8StringEncoding, null);
+
+writeTextToFile(file, path + '/' + layer_name + '.json')
 writeTextToFile(listText_str, path + '/' + layer_name + '.txt')
 exportLayer(layer,path + '/' + layer_name + '.png')
 		}
